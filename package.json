@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node --project tsconfig.json scripts/seed-conversations.ts"
+    "seed": "ts-node --project tsconfig.json scripts/seed-admin.ts"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",

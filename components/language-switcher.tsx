@@ -27,7 +27,7 @@ export function LanguageSwitcher() {
       <DropdownMenuContent align="end" className="w-40">
         <DropdownMenuItem
           onClick={() => setLanguage("en")}
-          className={`flex items-center justify-between ${language === "en" ? "bg-gray-100 dark:bg-gray-800" : ""}`}
+          className={`flex items-center justify-between ${language === "en" ? "bg-gray-100" : ""}`}
         >
           <div className="flex items-center">
             <div className="w-5 h-5 mr-2 rounded-sm overflow-hidden border border-gray-200">
@@ -45,7 +45,7 @@ export function LanguageSwitcher() {
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setLanguage("ne")}
-          className={`flex items-center justify-between ${language === "ne" ? "bg-gray-100 dark:bg-gray-800" : ""}`}
+          className={`flex items-center justify-between ${language === "ne" ? "bg-gray-100 " : ""}`}
         >
           <div className="flex items-center">
             <div className="w-5 h-5 mr-2 rounded-sm overflow-hidden border border-gray-200">

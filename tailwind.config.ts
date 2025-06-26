@@ -21,11 +21,11 @@ const config = {
       colors: {
         teal: {
           primary: "#017489",
-          dark: "#006955",
+          
         },
         blue: {
           medium: "#02609E",
-          dark: "#013A87",
+         
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
