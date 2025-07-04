@@ -40,7 +40,15 @@ export function EnhancedCalendarPage() {
       const response = await fetch("/api/events")
       if (response.ok) {
         const data = await response.json()
-        setEvents(data)
+        // Always ensure events have both id and _id as strings
+        const eventsArr = Array.isArray(data) ? data : data.events || []
+        setEvents(
+          eventsArr.map((event: any) => ({
+            ...event,
+            id: event._id ? event._id.toString() : event.id,
+            _id: event._id ? event._id.toString() : event.id,
+          }))
+        )
       } else {
         toast({
           title: "Error",
@@ -83,7 +91,9 @@ export function EnhancedCalendarPage() {
   }
 
   // Filter events based on selected filters
-  const filteredEvents = events.filter((event) => selectedFilters.length === 0 || selectedFilters.includes(event.type))
+  const filteredEvents = Array.isArray(events)
+    ? events.filter((event) => selectedFilters.length === 0 || selectedFilters.includes(event.type))
+    : []
 
   if (isLoading) {
     return (

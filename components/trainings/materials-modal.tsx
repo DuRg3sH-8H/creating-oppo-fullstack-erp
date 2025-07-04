@@ -86,8 +86,6 @@ export function MaterialsModal({ isOpen, onClose, materials, trainingTitle }: Ma
         url = url.startsWith("//") ? `https:${url}` : `https://${url}`
       }
 
-      
-
       // Open the actual material URL in new tab
       const newWindow = window.open(url, "_blank", "noopener,noreferrer")
 
@@ -147,6 +145,16 @@ export function MaterialsModal({ isOpen, onClose, materials, trainingTitle }: Ma
           {materials.map((material, index) => {
             const fileType = getFileType(material)
             const isLoading = loadingUrl === material.url
+            const url = material.url
+
+            // Check for YouTube link
+            const isYouTube = typeof url === "string" && (url.includes("youtube.com/watch") || url.includes("youtu.be/"))
+            let youtubeId: string | null = null
+            if (isYouTube) {
+              // Extract YouTube video ID
+              const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/)
+              youtubeId = match ? match[1] : null
+            }
 
             return (
               <Card key={index} className="hover:shadow-md transition-shadow">
@@ -162,6 +170,20 @@ export function MaterialsModal({ isOpen, onClose, materials, trainingTitle }: Ma
                           {material.size && <span className="text-xs text-gray-500">{material.size}</span>}
                         </div>
                         <p className="text-xs text-gray-400 mt-1 truncate">{material.url}</p>
+                        {isYouTube && youtubeId ? (
+                          <div className="mt-3">
+                            <iframe
+                              width="100%"
+                              height="315"
+                              src={`https://www.youtube.com/embed/${youtubeId}`}
+                              title="YouTube video player"
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              allowFullScreen
+                              className="rounded-lg shadow"
+                            ></iframe>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                     <div className="flex-shrink-0 ml-4">

@@ -32,7 +32,10 @@ export default function DocumentList({
   const [hoveredRow, setHoveredRow] = useState<string | null>(null)
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
 
-  const getFileIcon = (fileType: string) => {
+  const getFileIcon = (fileType: string | undefined) => {
+    if (!fileType || typeof fileType !== "string") {
+      return <FileText className="h-5 w-5 text-gray-500" />
+    }
     switch (fileType.toLowerCase()) {
       case "pdf":
         return <FileText className="h-5 w-5 text-red-500" />
@@ -243,17 +246,18 @@ export default function DocumentList({
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span
-                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    document.category === "template"
+                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${document.category === "template"
                       ? "bg-purple-100 text-purple-800"
                       : document.category === "policy"
                         ? "bg-blue-100 text-blue-800"
                         : document.category === "report"
                           ? "bg-yellow-100 text-yellow-800"
                           : "bg-green-100 text-green-800"
-                  }`}
+                    }`}
                 >
-                  {document.category.charAt(0).toUpperCase() + document.category.slice(1)}
+                  {document.category && typeof document.category === "string"
+                    ? document.category.charAt(0).toUpperCase() + document.category.slice(1)
+                    : "Unknown"}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">v{document.version}</td>

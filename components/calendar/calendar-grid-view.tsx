@@ -270,9 +270,9 @@ export function CalendarGridView({
                       </div>
 
                       <div className="space-y-1">
-                        {dayEvents.slice(0, 2).map((event) => (
+                        {dayEvents.slice(0, 2).map((event, idx) => (
                           <motion.div
-                            key={event._id}
+                            key={event._id ? `${event._id}-${idx}` : `event-${idx}`}
                             whileHover={{ scale: 1.02, y: -1 }}
                             className={cn(
                               "text-xs p-2 rounded-lg cursor-pointer truncate shadow-sm border transition-all duration-200 group",
@@ -314,9 +314,18 @@ export function CalendarGridView({
                                   </button>
                                   <button
                                     onClick={(e) => {
-                                      e.stopPropagation()
-                                      if (confirm("Delete this event?")) {
-                                        handleDeleteEvent(event._id)
+                                      e.stopPropagation();
+                                      let id = event._id;
+                                      // If _id is an object (e.g., ObjectId), try toString
+                                      if (id && typeof id !== "string" && typeof id.toString === "function") {
+                                        id = id.toString();
+                                      }
+                                      if (typeof id === "string" && /^[a-fA-F0-9]{24}$/.test(id)) {
+                                        if (confirm("Delete this event?")) {
+                                          handleDeleteEvent(id);
+                                        }
+                                      } else {
+                                        alert("Invalid event ID. Cannot delete this event.");
                                       }
                                     }}
                                     className="p-1 hover:bg-red-100 rounded text-red-600"

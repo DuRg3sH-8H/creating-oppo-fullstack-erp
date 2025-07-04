@@ -83,7 +83,9 @@ export function DocumentPreviewModal({ isOpen, onClose, document }: DocumentPrev
           <div>
             <h2 className="text-xl font-semibold text-gray-900">{document.name}</h2>
             <p className="text-sm text-gray-500 mt-1">
-              {document.category.charAt(0).toUpperCase() + document.category.slice(1)} • Version {document.version}
+              {document.category && typeof document.category === "string"
+                ? document.category.charAt(0).toUpperCase() + document.category.slice(1)
+                : "Unknown"} • Version {document.version}
             </p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-500 transition-colors">
@@ -99,7 +101,7 @@ export function DocumentPreviewModal({ isOpen, onClose, document }: DocumentPrev
                 className="w-full h-full border-0 rounded-lg shadow-sm"
                 title={document.name}
               />
-            ) : document.fileType.match(/^(jpg|jpeg|png|gif)$/i) ? (
+            ) : (typeof document.fileType === "string" && document.fileType.match(/^(jpg|jpeg|png|gif)$/i)) ? (
               <img
                 src={document.filePath || "/placeholder.svg"}
                 alt={document.name}

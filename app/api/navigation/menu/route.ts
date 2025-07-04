@@ -98,12 +98,6 @@ function getMenuItemsByRole(role: string) {
       roles: ["super-admin", "school"],
     },
     {
-      name: "Reports",
-      icon: "BarChart3",
-      href: "/dashboard/reports",
-      roles: ["super-admin", "school"],
-    },
-    {
       name: "Users",
       icon: "Users",
       href: "/dashboard/users",

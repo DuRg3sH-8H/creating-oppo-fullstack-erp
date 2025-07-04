@@ -117,7 +117,7 @@ export function EventsListView({ userRole, events, onEventClick, filteredEvents,
     <div className="space-y-4">
       {sortedEvents.map((event, index) => (
         <motion.div
-          key={event._id}
+          key={event.id}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -185,7 +185,7 @@ export function EventsListView({ userRole, events, onEventClick, filteredEvents,
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={(e) => handleDeleteEvent(event._id, e)}
+                      onClick={(e) => handleDeleteEvent(event.id, e)}
                       className="h-9 w-9 p-0 hover:bg-red-100"
                       title="Delete Event"
                     >

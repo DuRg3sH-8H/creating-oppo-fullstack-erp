@@ -21,7 +21,7 @@ interface CalendarViewProps {
   refreshTrigger: number
 }
 
-export function EnhancedCalendarView({ userRole, events, onEventSelect, refreshTrigger }: CalendarViewProps) {
+export function EnhancedCalendarView({ userRole, events, onEventSelect }: CalendarViewProps) {
   const [selectedEvent, setSelectedEvent] = useState<any>(null)
   const [isEventModalOpen, setIsEventModalOpen] = useState(false)
   const [isRegistrationsModalOpen, setIsRegistrationsModalOpen] = useState(false)
@@ -44,6 +44,14 @@ export function EnhancedCalendarView({ userRole, events, onEventSelect, refreshT
     e.stopPropagation()
 
     if (!confirm("Are you sure you want to delete this event?")) {
+      return
+    }
+    if (!eventId || typeof eventId !== "string" || eventId.length !== 24) {
+      toast({
+        title: "Invalid Event ID",
+        description: "The event ID is not valid.",
+        variant: "destructive",
+      })
       return
     }
 
@@ -124,91 +132,93 @@ export function EnhancedCalendarView({ userRole, events, onEventSelect, refreshT
     <div className="space-y-6">
       {/* Events Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {events.map((event, index) => (
-          <motion.div
-            key={event._id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-          >
-            <Card
-              className={`cursor-pointer hover:shadow-lg transition-all duration-300 border-l-4 ${
-                isEventPast(event.date) ? "border-l-gray-400 opacity-75" : "border-l-[#017489] hover:border-l-[#02609E]"
-              }`}
-              onClick={() => handleEventClick(event)}
+        {events
+          .filter((event) => event.id && typeof event.id === "string" && event.id.length === 24)
+          .map((event, index) => (
+            <motion.div
+              key={event.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg font-bold text-[#02609E] mb-2 line-clamp-2">{event.title}</CardTitle>
-                    <Badge className={`${getEventTypeColor(event.type)} text-xs`}>{event.type}</Badge>
+              <Card
+                className={`cursor-pointer hover:shadow-lg transition-all duration-300 border-l-4 ${isEventPast(event.date) ? "border-l-gray-400 opacity-75" : "border-l-[#017489] hover:border-l-[#02609E]"
+                  }`}
+                onClick={() => handleEventClick(event)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg font-bold text-[#02609E] mb-2 line-clamp-2">{event.title}</CardTitle>
+                      <Badge className={`${getEventTypeColor(event.type)} text-xs`}>{event.type}</Badge>
+                    </div>
+
+                    {userRole === "super-admin" && (
+                      <div className="flex gap-1 ml-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => handleViewRegistrations(event, e)}
+                          className="h-8 w-8 p-0 hover:bg-blue-100"
+                          title="View Registrations"
+                        >
+                          <UserCheck className="h-4 w-4 text-blue-600" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => handleDeleteEvent(event.id, e)}
+                          className="h-8 w-8 p-0 hover:bg-red-100"
+                          title="Delete Event"
+                          disabled={!event.id || typeof event.id !== "string" || event.id.length !== 24}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Calendar className="h-4 w-4 text-[#017489]" />
+                    <span>{formatDate(event.date)}</span>
                   </div>
 
-                  {userRole === "super-admin" && (
-                    <div className="flex gap-1 ml-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => handleViewRegistrations(event, e)}
-                        className="h-8 w-8 p-0 hover:bg-blue-100"
-                        title="View Registrations"
-                      >
-                        <UserCheck className="h-4 w-4 text-blue-600" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => handleDeleteEvent(event._id, e)}
-                        className="h-8 w-8 p-0 hover:bg-red-100"
-                        title="Delete Event"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </Button>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Clock className="h-4 w-4 text-[#017489]" />
+                    <span>
+                      {event.startTime} - {event.endTime}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <MapPin className="h-4 w-4 text-[#017489]" />
+                    <span className="line-clamp-1">{event.location}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Users className="h-4 w-4 text-[#017489]" />
+                    <span>By {event.organizer}</span>
+                  </div>
+
+                  {event.description && <p className="text-sm text-gray-600 line-clamp-2 mt-2">{event.description}</p>}
+
+                  {event.registrationOpen && !isEventPast(event.date) && (
+                    <div className="pt-2 border-t">
+                      <Badge className="bg-green-100 text-green-800 text-xs">Registration Open</Badge>
                     </div>
                   )}
-                </div>
-              </CardHeader>
 
-              <CardContent className="space-y-3">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Calendar className="h-4 w-4 text-[#017489]" />
-                  <span>{formatDate(event.date)}</span>
-                </div>
-
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Clock className="h-4 w-4 text-[#017489]" />
-                  <span>
-                    {event.startTime} - {event.endTime}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <MapPin className="h-4 w-4 text-[#017489]" />
-                  <span className="line-clamp-1">{event.location}</span>
-                </div>
-
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Users className="h-4 w-4 text-[#017489]" />
-                  <span>By {event.organizer}</span>
-                </div>
-
-                {event.description && <p className="text-sm text-gray-600 line-clamp-2 mt-2">{event.description}</p>}
-
-                {event.registrationOpen && !isEventPast(event.date) && (
-                  <div className="pt-2 border-t">
-                    <Badge className="bg-green-100 text-green-800 text-xs">Registration Open</Badge>
-                  </div>
-                )}
-
-                {isEventPast(event.date) && (
-                  <div className="pt-2 border-t">
-                    <Badge className="bg-gray-100 text-gray-600 text-xs">Event Completed</Badge>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
+                  {isEventPast(event.date) && (
+                    <div className="pt-2 border-t">
+                      <Badge className="bg-gray-100 text-gray-600 text-xs">Event Completed</Badge>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
       </div>
 
       {/* Event Detail Modal */}
