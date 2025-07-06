@@ -36,7 +36,6 @@ jobs:
           scripts
           package.json
           package-lock.json
-          .env.local
         target: ${{ secrets.APP_DIR }}
 
     - name: 🔁 SSH into VPS and deploy
