@@ -23,6 +23,19 @@ jobs:
 
     - name: 🛠️ Build the Next.js app
       run: npm run build
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        MONGODB_DB: ${{ secrets.MONGODB_DB }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        SMTP_HOST: ${{ secrets.SMTP_HOST }}
+        SMTP_PORT: ${{ secrets.SMTP_PORT }}
+        SMTP_SECURE: ${{ secrets.SMTP_SECURE }}
+        SMTP_USER: ${{ secrets.SMTP_USER }}
+        SMTP_PASS: ${{ secrets.SMTP_PASS }}
+        SMTP_FROM_NAME: ${{ secrets.SMTP_FROM_NAME }}
+        SMTP_FROM_EMAIL: ${{ secrets.SMTP_FROM_EMAIL }}
+        NODE_ENV: production
+
 
     - name: 🚀 Copy build + essentials to VPS
       uses: appleboy/scp-action@v0.1.5
