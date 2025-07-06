@@ -24,18 +24,19 @@ jobs:
     - name: 🛠️ Build the Next.js app
       run: npm run build
       env:
-        MONGODB_URI: ${{ secrets.MONGODB_URI }}
-        MONGODB_DB: ${{ secrets.MONGODB_DB }}
-        JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        SMTP_HOST: ${{ secrets.SMTP_HOST }}
-        SMTP_PORT: ${{ secrets.SMTP_PORT }}
-        SMTP_SECURE: ${{ secrets.SMTP_SECURE }}
-        SMTP_USER: ${{ secrets.SMTP_USER }}
-        SMTP_PASS: ${{ secrets.SMTP_PASS }}
-        SMTP_FROM_NAME: ${{ secrets.SMTP_FROM_NAME }}
-        SMTP_FROM_EMAIL: ${{ secrets.SMTP_FROM_EMAIL }}
-        NODE_ENV: production
-
+        MONGODB_URI:       ${{ secrets.MONGODB_URI }}
+        MONGODB_DB:        ${{ secrets.MONGODB_DB }}
+        JWT_SECRET:        ${{ secrets.JWT_SECRET }}
+        SMTP_HOST:         ${{ secrets.SMTP_HOST }}
+        SMTP_PORT:         ${{ secrets.SMTP_PORT }}
+        SMTP_SECURE:       ${{ secrets.SMTP_SECURE }}
+        SMTP_USER:         ${{ secrets.SMTP_USER }}
+        SMTP_PASS:         ${{ secrets.SMTP_PASS }}
+        SMTP_FROM_NAME:    ${{ secrets.SMTP_FROM_NAME }}
+        SMTP_FROM_EMAIL:   ${{ secrets.SMTP_FROM_EMAIL }}
+        NODE_ENV:          production
+        NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+        NEXT_PUBLIC_APP_NAME: ${{ secrets.NEXT_PUBLIC_APP_NAME }}
 
     - name: 🚀 Copy build + essentials to VPS
       uses: appleboy/scp-action@v0.1.5
@@ -43,12 +44,7 @@ jobs:
         host: ${{ secrets.VPS_IP }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_SSH_KEY }}
-        source: |
-          .next
-          public
-          scripts
-          package.json
-          package-lock.json
+        source: ".next/**,public/**,scripts/**,package.json,package-lock.json"
         target: ${{ secrets.APP_DIR }}
 
     - name: 🔁 SSH into VPS and deploy
@@ -78,10 +74,10 @@ jobs:
 
           echo "🔁 Restarting app with PM2..."
           pm2 describe erp > /dev/null
-            if [ $? -eq 0 ]; then
-            echo "Restarting existing pm2 process: erp"
+          if [ $? -eq 0 ]; then
+            echo "♻️ Restarting existing pm2 process: erp"
             pm2 restart erp
-            else
-            echo "Starting new pm2 process: erp"
+          else
+            echo "🚀 Starting new pm2 process: erp"
             pm2 start npm --name erp -- start
-            fi  
+          fi
