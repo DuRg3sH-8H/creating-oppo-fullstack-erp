@@ -1,0 +1,75 @@
+name: Build and Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📦 Checkout code
+      uses: actions/checkout@v3
+
+    - name: 🔧 Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 22
+
+    - name: ⬇️ Install dependencies
+      run: npm ci
+
+    - name: 🛠️ Build the Next.js app
+      run: npm run build
+
+    - name: 🚀 Copy build + essentials to VPS
+      uses: appleboy/scp-action@v0.1.5
+      with:
+        host: ${{ secrets.VPS_IP }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        source: |
+          .next
+          public
+          scripts
+          package.json
+          package-lock.json
+          .env.local
+        target: ${{ secrets.APP_DIR }}
+
+    - name: 🔁 SSH into VPS and deploy
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.VPS_IP }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          cd ${{ secrets.APP_DIR }}
+
+          echo "🧼 Installing production dependencies..."
+          npm ci --omit=dev
+
+          if [ ! -f .seed_done ]; then
+            echo "🧪 Running seed-admin.ts..."
+            npx tsx scripts/seed-admin.ts
+
+            echo "🧪 Running seed-class-structure.ts..."
+            npx tsx scripts/seed-class-structure.ts
+
+            echo "✅ Seeding done, creating .seed_done flag file"
+            touch .seed_done
+          else
+            echo "⚠️ Seed scripts already run, skipping..."
+          fi
+
+          echo "🔁 Restarting app with PM2..."
+          pm2 describe erp > /dev/null
+            if [ $? -eq 0 ]; then
+            echo "Restarting existing pm2 process: erp"
+            pm2 restart erp
+            else
+            echo "Starting new pm2 process: erp"
+            pm2 start npm --name erp -- start
+            fi  
